@@ -116,6 +116,7 @@
 
        <section title="Terminology">
           <t>TWAMP: Two-Way Active Measurement Protocol</t>
+          <t>OWAMP: One-Way Active Measurement Protocol</t>
           <t>KPI: Key Performance Indicator</t>
           <t>DPI: Deep Packet Inspection</t>
           <t>CGNAT: Carrier Grade Network Address Translation</t>
@@ -126,6 +127,7 @@
           <t>FTP: File Transfer Protocol</t>
           <t>SKMC: Services KPI Monitoring Command</t>
           <t>SID: Session ID</t>
+          <t>PDU: Protocol Data Unit</t>
           <t>MBZ: Must Be Zero</t>
           <t>HMAC: Hash Message Authentication Code</t>
           <t>IPVN: IP Version Number</t>
