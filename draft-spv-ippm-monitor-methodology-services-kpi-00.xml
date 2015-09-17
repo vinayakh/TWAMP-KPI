@@ -34,7 +34,7 @@
 <rfc category="info" docName="draft-sp-ippm-monitor-services-kpi-00">
 
   <front>
-    <title abbrev="Abbreviated Title">Monitoring Service KPIs using TWAMP</title>
+    <title abbrev="Service KPIs using TWAMP methodology">Monitoring Service KPIs using TWAMP - Methodology</title>
 
     <author fullname="Srivathsa Sarangapani" surname="Srivathsa Sarangapani">
       <organization>Juniper Networks</organization>
@@ -66,11 +66,26 @@
       </address>
     </author>
 
+    <author fullname="Vinayak Hegde" initials="V." surname="Hegde">
+      <organization></organization>
+      <address>
+        <postal>
+          <street>Brahma Sun City, Wadgaon-Sheri</street>
+          <city>Pune</city>
+          <region>Maharashtra</region>
+          <code>411014</code>
+          <country>INDIA</country>
+        </postal>
+        <phone>+91 944984401</phone>
+        <email>vinayakh@gmail.com</email>
+      </address>
+    </author>
+
     <date year="2015" />
 
     <area>General</area>
 
-    <workgroup>Network Working Group</workgroup>
+    <workgroup>IP Performance Metrics Group</workgroup>
 
     <keyword>template</keyword>
 
@@ -378,7 +393,7 @@
        </section>
 
        <section title="TWAMP-Test Extension" anchor="TTE">
-          <t>As part of this extension, the existing Packet Padding octets in the Test Packet MAY be used for the monitoring of the Services KPIs as explained in <xref target="SKPI" />. The Packet Padding octets which were either zero or filled with pseudo-random values MAY now have some valid data like timestamps, statistics, service PDUs and so on.</t>
+          <t>As part of this extension, the existing Packet Padding octets in the Test Packet MAY be used for the monitoring of the Services KPIs as explained in KPI Implemnetation Draft. The Packet Padding octets which were either zero or filled with pseudo-random values MAY now have some valid data like timestamps, statistics, service PDUs and so on.</t>
 
           <t>The Session-Sender Test Session data packet formats are provided below.</t>
           <figure align="left" anchor="ssudf_cmd" title="Unauthenticated
@@ -539,122 +554,7 @@
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
                  ]]></artwork>
           </figure>
-          <t>As a part of this extension, Monitored Services KPIs Bitmask indicates the services KPIs that are present in this message. The KPIs would be present in the Packet Padding area in the same order as indicated by Bitmask starting from bit 0 Position. The set of KPIs defined for a service are listed in <xref target="SKPI" />.</t>
-       </section>
-    </section>
-
-    <section title="Services KPIs" anchor="SKPI">
-       <section title="Services Keepalive Monitoring" anchor="SKM">
-          <t>The Session-Sender MAY send the Service PDU as part of the TWAMP-Test Packet Padding. When Session-Reflector receives the TWAMP-Test packet, it SHALL extract the Service PDU. Then Session-Reflector SHALL inject the Service PDU to the Service Block for service processing.</t>
-          <t>Based on whether the Session-Reflector received the response, the Session-Reflector SHALL decide whether the Service is alive or not.</t>
-
-          <t>The Session-Reflector MUST start the Packet Padding with the below 4 octets as indicated in Fig.11 [TBD]. This is followed by the Service PDU (which MAY be same as whatever was sent by Session-Sender or can be the reply/response packet of the Service Block).</t>
-
-          <t>Setting Bit 0(X) indicates that the Session-Reflector successfully sent the Service Request to the Service Block and received the response from the Service Block. If this bit is NOT set then it indicates that the Service Block is not functional.</t>
-          <figure align="left" anchor="skm" title="Services Keepalive Monitoring">
-              <artwork align="center"><![CDATA[
- 0                   1                   2                   3
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|X| Reserved    |          MBZ (3 octets)                       |
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-              ]]></artwork>
-          </figure>
-       </section>
-
-       <section title="Service Latency" anchor="SL">
-          <t>The Session-Sender MAY send the Service PDU as part of the TWAMP-Test Packet Padding. When Session-Reflector receives the TWAMP-Test message, it SHALL extract the Service PDU and inject that service PDU in the Service Block.</t>
- 
-          <t>The Session-Reflector MUST record the time, when this service PDU is injected. This SHALL be the Service latency measurement Sender Timestamp.</t>
-    
-          <t>Once the Session-Reflector received the Response from the Service Block, it MUST record the time. This time SHALL be the Service latency measurement Receiver Timestamp.</t> 
-
-          <t>If the Session-Reflector does NOT receive the Service PDU (within pre configured time which is implementation specific), then it shall indicate the Service latency measurement Receiver Timestamp as 0. The Session-Reflector MUST start the Packet Padding with the 16 octets indicated below. This SHALL be followed by the Service PDU (which MAY be same as whatever was sent by Session-Sender or can be the reply/response packet of the Service Block).</t>
-          <figure align="left" anchor="sl" title="Services Keepalive Monitoring">
-              <artwork align="center"><![CDATA[
-   0                   1                   2                   3
-   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                                                               |
-   |      Service latency measurement Sender Timestamp             |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                                                               |
-   |      Service latency measurement Receiver Timestamp           |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-              ]]></artwork>
-          </figure>
-       </section>
-
-       <section title="Serviced Packets Count" anchor="SPC">
-          <t>When Session-Reflector receives the TWAMP-Test message, it SHALL get the information about Number of Ingress Service Data packets and Number of Egress Service Data packets from the Service Block. How Session-Reflector gets this information is implemenatation dependant. Once the Session-Reflector gets this information, it MUST start the Packet Padding with the below 16 octets. This SHALL be followed by the actual Packet Padding.</t>
-          <figure align="left" anchor="spc" title="Serviced Packets Count">
-              <artwork align="center"><![CDATA[
-   0                   1                   2                   3
-   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |         Number of Ingress Service Data packets                |
-   |                                                               |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |         Number of Egress Service Data packets                 |
-   |                                                               |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-              ]]></artwork>
-          </figure>
-       </section>
-
-       <section title="Serviced Bytes Count" anchor="SBC">
-          <t>When Session-Reflector receives the TWAMP-Test message, it SHALL get the information about Number of Ingress Service Data bytes and Number of Egress Service Data bytes from the Service Block. How Session-Reflector gets this information is implemenatation dependant. Once the Session-Reflector gets this information, it MUST start the Packet Padding with the below 16 octets. This SHALL be followed by the actual Packet Padding.</t>
-          <figure align="left" anchor="sbc" title="Serviced Bytes Count">
-              <artwork align="center"><![CDATA[
-   0                   1                   2                   3
-   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |         Number of Ingress Service Data bytes                  |
-   |                                                               |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |         Number of Egress Service Data bytes                   |
-   |                                                               |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-             ]]></artwork>
-         </figure>
-       </section>
-
-       <section title="Serviced Subscriber Count" anchor="SSC">
-          <t>When Session-Reflector receives the TWAMP-Test message, it SHALL get the below information :</t>
-          <t>Total Number of Subscribers      : Total number of subscribers that are currently present for the Service + 1. This count includes Active, Non-Active and any other type of subscribers.</t>
-
-          <t>Number of Active Subscribers     : Number of subscribers who are currently Actively using the Service + 1. The meaning of Active MAY vary from Service to Service and this is implementation specific.</t>
-
-          <t>Number of Non-Active Subscribers : Number of subscribers who are currently NOT Actively using the Service + 1. The meaning of NOT Active MAY vary from Service to Service and this is implementation specific.</t>
-
-          <t>Number of Subscribers Added      : Number of subscribers who were NEWLY added compared to the last time the statistics was taken + 1.</t>
-
-          <t>Number of Subscribers Deleted    :Number of subscribers who were deleted, preempted compared to the last time the statistics was taken + 1.</t>
-
-          <t>Any of the above field can be 0 if that statistics is not supported or not valid for a particular service. Session-Reflector should always fill the value by increasing the actual service statistics by 1. Say for example, if Numer of Active Subscribers is 0, then Session-Reflector would fill this field as 1. When Session-Sender receives this value, it should subtract 1 from the received value and use it.</t> 
-          <t>How Session-Reflector gets this information is implemenatation dependant. Once the Session-Reflector gets this information, it MUST start the Packet Padding with the below 40 octets. This SHALL be followed by the actual Packet Padding.</t>
-          <figure align="left" anchor="ssc" title="Serviced Subscriber Count">
-              <artwork align="center"><![CDATA[
-0                   1                   2                   3
-0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|               Total Number of Subscribers                     |
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|               Number of Active Subscribers                    |
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|               Number of Non-Active Subscribers                |
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|               Number of Subscribers Added                     |
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|               Number of Subscribers Deleted                   |
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-              ]]></artwork>
-          </figure>
+          <t>As a part of this extension, Monitored Services KPIs Bitmask indicates the services KPIs that are present in this message. The KPIs would be present in the Packet Padding area in the same order as indicated by Bitmask starting from bit 0 Position. The set of KPIs defined for a service are listed in KPI Implementation draft</t>
        </section>
     </section>
 
