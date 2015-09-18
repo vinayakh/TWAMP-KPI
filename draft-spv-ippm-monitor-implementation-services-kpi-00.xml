@@ -34,9 +34,9 @@
 <rfc category="info" docName="draft-sp-ippm-monitor-services-kpi-00">
 
   <front>
-    <title abbrev="Abbreviated Title">Monitoring Service KPIs using TWAMP</title>
+    <title abbrev="Service KPIs using TWAMP implementation">Monitoring Service KPIs using TWAMP - Implementation</title>
 
-    <author fullname="Srivathsa Sarangapani" surname="Srivathsa Sarangapani">
+    <author fullname="Srivathsa Sarangapani" surname="Sarangapani">
       <organization>Juniper Networks</organization>
       <address>
         <postal>
@@ -51,7 +51,7 @@
       </address>
     </author>
 
-    <author fullname="Peyush Gupta" surname="Peyush Gupta">
+    <author fullname="Peyush Gupta" surname="Gupta">
       <organization>Juniper Networks</organization>
       <address>
         <postal>
@@ -66,6 +66,22 @@
       </address>
     </author>
 
+    <author fullname="Vinayak Hegde" initials="V." surname="Hegde">
+      <organization>Consultant</organization>
+      <address>
+        <postal>
+          <street>Brahma Sun City, Wadgaon-Sheri</street>
+          <city>Pune</city>
+          <region>Maharashtra</region>
+          <code>411014</code>
+          <country>INDIA</country>
+        </postal>
+        <phone>+91 944984401</phone>
+        <email>vinayakh@gmail.com</email>
+	<uri>http://www.vinayakhegde.com</uri>
+      </address>
+    </author>
+
     <date year="2015" />
 
     <area>General</area>
@@ -75,7 +91,7 @@
     <keyword>template</keyword>
 
     <abstract>
-     <t>We are introducing a new method to calculate services KPIs and metrics in the network using TWAMP protocol. The services here ranging from subscriber aware services to security application, Traffic load balancing, content delivery, real time streaming and like.The KPIs discussed in this draft include Service Latency, Serviced Packets Count, Serviced Subscriber Count, Application Liveliness and Session load per Service. KPIs monitoring of these services therefore, play a vital role in optimum usage of network resources such as capacity and throughput. Once we have the attributes like service latency, the network topology can be chosen to provide better quality of experience to the end user. For different services, the attributes may vary and our design takes care of supporting different KPIs for different services model. Additionally, liveliness of application and servers can be monitored using this proposed solution.</t>
+     <t>We are using a new method to calculate services KPIs and metrics in the network using TWAMP protocol. The services here ranging from subscriber aware services to security application, Traffic load balancing, content delivery, real time streaming and like.The KPIs discussed in this draft include Service Latency, Serviced Packets Count, Serviced Subscriber Count, Application Liveliness and Session load per Service. KPIs monitoring of these services therefore, play a vital role in optimum usage of network resources such as capacity and throughput. Once we have the attributes like service latency, the network topology can be chosen to provide better quality of experience to the end user. For different services, the attributes may vary and our design takes care of supporting different KPIs for different services model. Additionally, liveliness of application and servers can be monitored using this proposed solution.</t>
     </abstract>
 
     </front>
@@ -111,435 +127,6 @@
           <t>FTP: File Transfer Protocol</t>
           <t>SKMC: Services KPI Monitoring Command</t>
           <t>PDU: Protocol Data Unit</t>
-       </section>
-    </section>
-
-    <section title="Purpose and Scope">
-      <t>The purpose of this extension is to provide a method to describe an additional optional feature for TWAMP <xref target="RFC5357">RFC&nbsp;5357</xref>.</t>
-
-      <t>The scope of the extension is limited to specifications of the following features:</t>
-
-      <t><list style="numbers">
-          <t>Extension of the modes of operation through assignment of a new value in the Modes field to communicate feature capability.</t>
-          
-          <t>Addition of new command types to identify, negotiate and monitor the supported services and supported KPIs for each service between Control-Client and TWAMP Server.</t>
-
-          <t>Use of existing padding octets of TWAMP-Test session to carry the services KPI data that is being monitored as part of the TWAMP-Test session.</t>
-
-          </list>The purpose for this feature is to enhance TWAMP protocol to monitor and calculate service-related KPIs in real-time that helps in network performance analysis and optimization.</t>
-          <t>The actual method to calculate the KPIs is not discussed and depends on implementation.</t> 
-    </section>
-
-    <section title="Logical Model">
-       <t>The set of messages that are exchanged between the Control-Client and TWAMP Server to negotiate and monitor the services KPI is referred to as Service Block (Fig 1.) Service Block MAY be a part of the same network element or can be a different entity.</t>
-
-       <t>Services KPI-Monitor-REQ is sent from Control-Client to TWAMP Server to get the list of supported services and the KPIs that can be monitored for each service. Once TWAMP Server receives this request, Services KPI-Monitor-RSP is sent with the number of services that can be monitored on this Control-Client connection.</t>
-   
-       <t>This message is followed by Services KPI-Monitor-IND message from the Session-Reflector which contain a service ID to identify the service and the list of KPIs that are supported for this service.The client replies with the Services KPI-Monitor-ACK message that include the list of KPIs the client is interested in monitoring.These two sets of messages will be repeated for each of the services that Server can monitor.</t>
-
-       <t>Then the client will initiate Request-TW-Session Message that contain the service ID for a specific service. Once Server replies with the Accept-Session Message, the client SHALL start sending test packets that MAY contain Service PDU.</t>
-
-       <figure align="left" anchor="Service_block">
-       <artwork align="center"><![CDATA[
-
-+--------+                          +--------+
-| Client |                          | Server |
-+--------+                          +--------+
-    |                                   |
-    |<------TCP Connection------------->|
-    |                                   |
-    |<------Greeting Message------------|
-    |                                   |
-    |-------Set-Up-Response------------>|
-    |                                   |
-    |<------Server-Start----------------|
-    |                                   |
-    |-------Services KPI-Monitor-REQ--->|
-    |<------Services KPI-Monitor-RSP----|
-    |                                   |
-    |<-----Services KPI-Monitor-IND-----|
-    |------Services KPI-Monitor-ACK---->|
-    |              .                    |
-    |              .                    |
-    |              .                    |
-    |<-----Services KPI-Monitor-IND-----|
-    |------Services KPI-Monitor-ACK---->|
-    |                                   |
-    |------Request-TW-Session---------->|
-    |<-----Accept Session---------------|
-    |              .                    |
-    |              .                    |
-    |------Request-TW-Session---------->|
-    |<-----Accept Session---------------| 
-
-            ]]></artwork>
-      </figure>
-    </section>
-    <section title="TWAMP Extensions">
-      <t> The TWAMP connection establishment follows the procedure defined in Section 3.1 of <xref target="RFC4656">OWAMP&nbsp;</xref> and Section 3.1 of <xref target="RFC5357">TWAMP&nbsp;</xref> where the Modes field is used to identify and select specific communication capabilities.  At the same time the Modes field been recognized and used as an extension mechanism of <xref target="RFC6038">TWAMP Reflect Octets and Symmetrical Size Features&nbsp;</xref>. The new feature requires a new bit position to identify the ability of a Session-Reflector to monitor Services KPIs. There are changes in both the Control-Client and TWAMP-Test packet formats to support this functionality.</t> 
-       <section title="TWAMP-Control Extensions">
-          <t>The TWAMP-Control is a derivative of the OWAMP-Control, and provides two-way measurement capability. <xref target="RFC5357">TWAMP;</xref> uses the Modes field to identify and select specific communication capabilities, and this field is a recognized extension mechanism. The following Sections describe one such extension.</t>
-          <section title="Connection Setup with Services KPIs Monitoring">
-            <t>TWAMP-Control connection establishment follows the procedure defined in Section 3.1 of <xref target="RFC4656">OWAMP;</xref>. The Services KPIs Monitoring using TWAMP mode requires one new bit position (and value) to identify the ability of the Server or the Session-Reflector to monitor the Services KPIs of the sessions. This new extension requires an additional TWAMP mode bit assignment as explained in Section 5.1.</t>
-            <t>A Control-Client MAY request for Services KPIs monitoring for some of its sessions. To do so, it needs to know which services can be monitored and the corresponding KPIs (of those services)that can be monitored.</t>
-
-            <t>Services KPI Monitoring Command (SKMC) consist of a set of messages which SHALL be used for monitoring the KPIs of a service. This new command requires an additional TWAMP Command Number as explained in <xref target="IANA" />.</t>
-          </section>
-          <section title="Services KPI-Monitor-REQ Command" anchor="SKMREQ">
-             <t>A Control-Client MAY send Services KPI-Monitor-REQ command to the Server to obtain the list of services and their KPIs that can be monitored by the Session-Reflector.</t>
-
-             <t>The format of the Services KPI-Monitor-REQ Command is as follows:</t>
-
-             <figure align="left" anchor="skmreq_cmd" title="Services KPI-Monitor-REQ Command">
-               <artwork align="center"><![CDATA[
- 0                   1                   2                   3
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-| Command Number|       REQ     |       MBZ (2 octets)          |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                                                               |
-|                       HMAC (16 octets)                        |
-|                                                               |
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                 ]]></artwork>
-            </figure>
-
-            <t>Since this is a new command, a Command Number value should be allocated by the IANA in the registry as mentioned in <xref target="IANA" />. The command number indicates that this is one of the Services KPI Monitoring Command.  The Control-Client MUST compose this command, and the Server MUST interpret this command, according to the field descriptions below.</t>
-
-            <t>The sub-type field MUST be REQ for this message. This message indicates that the Client is requesting Server to send the list of Services and the corrosponding KPIs that can be monitored.</t>
-            <t>The message is terminated with a single block HMAC, as illustrated above.</t>
-
-            <t>The Server MUST respond with Services KPI-Monitor-RSP Command <xref target="SKMRSP" />.</t>
-          </section>
-
-          <section title="Services KPI-Monitor-RSP Command" anchor="SKMRSP">
-             <t>The Server responds to the Services KPI-Monitor-REQ Command by sending a Services KPI-Monitor-RSP Command. The format of the Services KPI-Monitor-RSP Command is as follows:</t>
-
-             <figure align="left" anchor="skmrsp_cmd" title="Services KPI-Monitor-RSP Command">
-                <artwork align="center"><![CDATA[
- 0                   1                   2                   3
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|Command Number |      RSP      |       MBZ (2 octets)          |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                 Number of services                            |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                                                               |
-|                       HMAC (16 octets)                        |
-|                                                               |
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                ]]></artwork>
-             </figure>
-
-             <t>The Command Number value here is same as mentioned in <xref target="IANA" />. The Server MUST compose this command, and the Control-Client MUST interpret this command, according to the field descriptions below.</t>
-   
-             <t>The sub-type field MUST be RSP for this command. The field "Number of Services" indicates the number of Services for which the Session-Reflector can monitor the KPI.</t>
- 
-            <t>The message is terminated with a single block HMAC, as illustrated above.</t>
-          </section>
-
-          <section title="Services KPI-Monitor-IND Command" anchor="SKMIND">
-            <t> The Server MUST send the Services KPI-Monitor-IND Command after sending Services KPI Monitor-RSP message. This message includes the list of KPIs that can be monitored for a service.</t>
-
-             <figure align="left" anchor="skmind_cmd" title="Services KPI-Monitor-IND Command">
-               <artwork align="center"><![CDATA[
- 0                   1                   2                   3
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-| Command Number|       IND     |         Service ID            |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                                                               |
-|         Service Description (12 octets)                       |
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                                                               |
-|         Supported Services KPIs Bitmask (2 octets)            |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                                                               |
-|         HMAC (16 octets)                                      |
-|                                                               |
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-               ]]></artwork>
-             </figure>
-
-             <t>The Command Number value here is same as mentioned in <xref target="IANA" />. The Server MUST compose this command, and the Control-Client MUST interpret this command, according to the field descriptions below.</t>
-
-             <t>The sub-type field MUST be IND for this Command. This field indicates that the Server is responding to the Control-Client with the details of the KPIs of a service that can be monitored by Session-Reflector.</t>
-
-             <t>Service ID is an identifier which would be set by the Server to identify a Service. This ID MUST be used in the TWAMP-Control and TWAMP-Test messages to identify a particular Service. The range of Service ID MUST be 1 to 65535; The value 0 is Reserved.</t>
-
-
-             <t>Service Description MAY be set of alphanumeric characters that would provide a brief description of a particular Service. Example: "DPI"  "CGNAT" "DNS-Server" "HTTP-Server".</t>
-
-             <t>Supported Services KPIs Bitmask is a bitmask that would indicate the kind of KPI Monitoring using TWAMP is supported by the Session-Reflector for a particular Service.</t>
-
-             <t>The message is terminated with a single block HMAC, as illustrated above.</t>
-
-             <t>For each Services KPIs monitoring supported, the Server MUST send one Services KPI-Monitor-IND Command to the Control-Client.</t>
-          </section>
-
-          <section title="Services KPI-Monitor-ACK Command" anchor="SKMACK">
-             <t>The Control-client MUST respond back with a Services KPI-Monitor-ACK Command for each Services KPI-Monitor-IND Command.</t>
-
-             <figure align="left" anchor="skmack_cmd" title="Services KPI-Monitor-ACK Command">
-                <artwork align="center"><![CDATA[
- 0                   1                   2                   3
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-| Command Number|       ACK       |         Service ID          |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                                                               |
-|         Service Description (12 octets)                       |
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                                                               |
-|         Requested Services KPIs Bitmask (2 octets)            |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                                                               |
-|         HMAC (16 octets)                                      |
-|                                                               |
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                ]]></artwork>
-             </figure>
-
-             <t>The Command Number is same as mentioned in <xref target="IANA" />. The Server MUST frame this command, and the Control-Client MUST interpret this command, according to the field descriptions below.</t>
-             <t>The sub-type field MUST be ACK for this message. This field indicates that the Control-client is acknowledging the Server with details of which KPIs of a particular service it is interested in.</t>
-
-             <t>Service ID and Service Description MUST be same as that received in the Services KPI-Monitor-IND Command. These two fields together identify a particular Service.</t>
-
-             <t>Requested Services KPIs Bitmask MUST be set by the Control-Client and that indicates the KPIs of the services that the Control-Client is interested in monitoring. The KPIs can be a subset or the full set of KPIs sent in the corresponding Service KPI-Monitor-IND Command.</t>
-   
-             <t>The Command is terminated with a single block HMAC, as illustrated above.</t>
-<t>For each Services KPI-Monitor-IND Command received at the control-client, it acknowledges by sending a Services KPI-Monitor-ACK Command.</t>
-          </section>
-
-          <section title="Request-TW-Session Command Format" anchor="RTWSCF">
-             <figure align="left" anchor="req_tw_sess_cmd" title="Request-TW-Session Command">
-                     <artwork align="center"><![CDATA[
- 0                   1                   2                   3
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|      5        |  MBZ  | IPVN  |  Conf-Sender  | Conf-Receiver |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                  Number of Schedule Slots                     |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                      Number of Packets                        |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|          Sender Port          |         Receiver Port         |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                        Sender Address                         |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                                                               |
-|           Sender Address (cont.) or MBZ (12 octets)           |
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                        Receiver Address                       |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                                                               |
-|           Receiver Address (cont.) or MBZ (12 octets)         |
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                                                               |
-|                        SID (16 octets)                        |
-|                                                               |
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                         Padding Length                        |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                           Start Time                          |
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                       Timeout, (8 octets)                     |
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                       Type-P Descriptor                       |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|     Octets to be reflected    |  Length of padding to reflect |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|          Service ID           |        MBZ (2 octets)         |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                                                               |
-|                       HMAC (16 octets)                        |
-|                                                               |
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                  ]]></artwork>
-             </figure>
-             <t>This new feature requires 2 octets to indicate the Service ID as a part of Request-TW-Session Command. See <xref target="IANA" /> for details on the octet position. If Services KPIs Monitoring using TWAMP feature is not requested as a part of this TWAMP-Test Session, then the Service ID MUST be 0.</t>
-
-             <t>If Service ID has a non-zero value, then the Padding Length field MAY not have any significance. The test packets between Session-Sender and Session-Reflector MAY be of different size based on the implementation.</t>
-
-             <t>The actual test packets MAY contain valid data which SHOULD be interpreted by Session-Sender or Session-Reflector to monitor Services KPIs.  Please refer TWAMP-Test Extension <xref target="TTE" /> for more details.</t>
-          </section>
-       </section>
-
-       <section title="TWAMP-Test Extension" anchor="TTE">
-          <t>As part of this extension, the existing Packet Padding octets in the Test Packet MAY be used for the monitoring of the Services KPIs as explained in <xref target="SKPI" />. The Packet Padding octets which were either zero or filled with pseudo-random values MAY now have some valid data like timestamps, statistics, service PDUs and so on.</t>
-
-          <t>The Session-Sender Test Session data packet formats are provided below.</t>
-          <figure align="left" anchor="ssudf_cmd" title="Unauthenticated
-                  Mode Session-Sender Data Packet Format">
-              <artwork align="center"><![CDATA[
- 0                   1                   2                   3
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                        Sequence Number                        |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                          Timestamp                            |
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|        Error Estimate         |                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                               |
-|                         MBZ (6 octets)                        |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                                                               |
-.                                                               .
-.                         Packet Padding                        .
-.                                                               .
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                ]]></artwork>
-          </figure>
-          <t>As a part of the extension, 6 octets of MBZ are added after the Error Estimate field.</t>
-
-          <figure align="left" anchor="ssaedf_cmd" title="Authenticated and
-                  Encrypted Mode Session-Reflector Data Packet Format">
-              <artwork align="center"><![CDATA[
- 0                   1                   2                   3
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                        Sequence Number                        |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                                                               |
-|                        MBZ (12 octets)                        |
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                          Timestamp                            |
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|        Error Estimate         |                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                               |
-|                         MBZ (6 octets)                        |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                                                               |
-|                       HMAC (16 octets)                        |
-|                                                               |
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                                                               |
-.                                                               .
-.                        Packet Padding                         .
-.                                                               .
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-              ]]></artwork>
-          </figure>
-          <t>The Session-Reflector Test Session data packet formats are provided below.</t>
-
-          <figure align="left" anchor="srudf_cmd" title="Unauthenticated Mode
-                  Session-Reflector Data Packet Format">
-              <artwork align="center"><![CDATA[
- 0                   1                   2                   3
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                        Sequence Number                        |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                          Timestamp                            |
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|         Error Estimate        |           MBZ                 |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                          Receive Timestamp                    |
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                        Sender Sequence Number                 |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                          Sender Timestamp                     |
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|      Sender Error Estimate    |           MBZ                 |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|  Sender TTL   |                 MBZ                           |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                                                               |
-|  Monitored Services KPIs Bitmask (2 octets)                   |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                                                               |
-.                                                               .
-.                   Packet Padding                              .
-.                                                               .
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-              ]]></artwork>
-          </figure>
-          <t>As a part of this extension, The 3 octets of MBZ are added after the Error Estimate field to align the next set of fields.</t>
-  
-          <t>Monitored Services KPIs Bitmask indicates the services KPIs that are present in this message. The KPIs would be present in the Packet Padding area in the same order as indicated by Bitmask starting from bit 0 Position.</t>
- 
-          <figure align="left" anchor="sraedf_cmd" title="Authenticated and
-                  Encrypted Mode Session-Reflector Data Packet Format">
-            <artwork align="center"><![CDATA[
- 0                   1                   2                   3
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                        Sequence Number                        |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                        MBZ (12 octets)                        |
-|                                                               |
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                          Timestamp                            |
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|         Error Estimate        |                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                               +
-|                        MBZ (6 octets)                         |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                        Receive Timestamp                      |
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                        MBZ (8 octets)                         |
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                        Sender Sequence Number                 |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                        MBZ (12 octets)                        |
-|                                                               |
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                      Sender Timestamp                         |
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|      Sender Error Estimate    |                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                               +
-|                        MBZ (6 octets)                         |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|  Sender TTL   |                                               |
-+-+-+-+-+-+-+-+-+                                               +
-|                                                               |
-|                                                               |
-|                        MBZ (15 octets)                        |
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-|                        HMAC (16 octets)                       |
-|                                                               |
-|                                                               |
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                                                               |
-|    Monitored Services KPIs Bitmask (2 octets)                 |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                                                               |
-.                   Packet Padding                              .
-.                                                               .
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                 ]]></artwork>
-          </figure>
-          <t>As a part of this extension, Monitored Services KPIs Bitmask indicates the services KPIs that are present in this message. The KPIs would be present in the Packet Padding area in the same order as indicated by Bitmask starting from bit 0 Position. The set of KPIs defined for a service are listed in <xref target="SKPI" />.</t>
        </section>
     </section>
 
@@ -665,57 +252,6 @@
     <!-- Possibly a 'Contributors' section ... -->
 
     <section anchor="IANA" title="IANA Considerations">
-      <t>The TWAMP-Modes registry defined in <xref target="RFC6038"></xref>. IANA is requested to reserve a new bit in Modes registry for Services KPIs Monitoring Capability as follows:</t>
-      <texttable anchor="SKMCap" title="Services KPIs Monitoring Capability">
-        <ttcol align="left">Value</ttcol>
-        <ttcol align="left">Description</ttcol>
-        <ttcol align="left">Semantics</ttcol>
-        <ttcol align="left">Reference</ttcol>
-
-        <c>X (proposed 256)</c>
-        <c>Services KPIs Monitoring Capability</c>
-        <c>bit position Y(proposed 8)</c>
-        <c>This document</c>
-      </texttable>
-
-      <t>TWAMP-Control Command Number Registry defined in <xref target="RFC5938"></xref>.IANA is requested to reserve a Command Number for Services KPIs Monitoring Capability as follows:</t>
-      <texttable anchor="SKMCom" title="New Service Latency Monitoring Command">
-        <ttcol align="left">Value</ttcol>
-        <ttcol align="left">Description</ttcol>
-        <ttcol align="left">Semantics</ttcol>
-        <ttcol align="left">Reference</ttcol>
-
-        <c>SKMC (proposed 11)</c>
-        <c>Services KPIs Monitoring Command</c>
-        <c> </c>
-        <c>This document</c>
-      </texttable>
-
-      <t>TWAMP Services KPIs sub-type Registry</t>
-      <t>IANA is requested to reserve and maintain the sub-types as a part of Services KPIs Monitoring Command as follows:</t>
-
-      <texttable anchor="SKsub-reg" title="TWAMP Services KPIs sub-type Registry">
-        <ttcol align="left">Value</ttcol>
-        <ttcol align="left">Description</ttcol>
-        <ttcol align="left">Explanation</ttcol>
-
-        <c>0</c>     
-        <c>Reserved</c> 
-        <c></c>     
-        <c>1</c>     
-        <c>REQ</c>    
-        <c><xref target="SKMREQ" /></c>     
-        <c>2</c>   
-        <c>RESP</c>   
-        <c><xref target="SKMRSP" /></c>     
-        <c>3</c>   
-        <c>IND</c>    
-        <c><xref target="SKMIND" /></c>     
-        <c>4</c>   
-        <c>ACK</c>    
-        <c><xref target="SKMACK" /></c>     
-      </texttable>
-
       <t>TWAMP Services KPIs Registry</t>
       <t>IANA is requested to reserve and maintain the below Services KPIs:</t> 
 
@@ -771,9 +307,7 @@
       <!--?rfc include="http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml"?-->
       &RFC2119;
       &RFC5357;
-      &RFC4656;
       &RFC6038;
-      &RFC5938;
 
     </references>
   </back>
