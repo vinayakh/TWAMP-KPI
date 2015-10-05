@@ -31,7 +31,7 @@
 <?rfc subcompact="no" ?>
 <!-- keep one blank line between list items -->
 <!-- end of list of popular I-D processing instructions -->
-<rfc category="info" docName="draft-sp-ippm-monitor-services-kpi-00">
+<rfc category="info" docName="draft-spv-ippm-monitor-implementation-services-kpi-00">
 
   <front>
     <title abbrev="Service KPIs using TWAMP implementation">Monitoring Service KPIs using TWAMP - Implementation</title>
